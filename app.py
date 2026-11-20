@@ -103,10 +103,23 @@ def analyze_and_translate_with_gemini(api_key, media_path, script_style):
     [MM_END]
     """
 
-    response = client.models.generate_content(
-        model="gemini-3.8-flash",
-        contents=[uploaded_file, prompt]
-    )
+    response = None
+last_err = None
+for m_name in ["gemini-2.5-flash", "gemini-3.8-flash", "gemini-2.0-flash"]:
+    for attempt in range(2):
+        try:
+            response = client.models.generate_content(
+                model=m_name,
+                contents=[uploaded_file, prompt]
+            )
+            break
+        except Exception as e:
+            last_err = e
+            time.sleep(3)
+    if response is not None:
+        break
+if response is None:
+    raise last_err
 
     try:
         client.files.delete(name=uploaded_file.name)
