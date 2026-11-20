@@ -8,7 +8,7 @@ import yt_dlp
 import edge_tts
 from google import genai
 
-st.set_page_config(page_title="AI Transcript & Myanmar Narrator Pro", layout="wide")
+st.set_page_config(page_title="A to Z Narrator Recap", page_icon="🎙️", layout="wide")
 
 # ==================== CLEANUP & HELPERS ====================
 
@@ -51,7 +51,7 @@ def download_media_from_link(url, out_base="source_media_raw"):
         'no_warnings': True,
         'extractor_args': {
             'youtube': {
-                'player_client': ['android', 'web']
+                'player_client': ['ios', 'tv_embedded', 'android']
             }
         }
     }
@@ -104,22 +104,22 @@ def analyze_and_translate_with_gemini(api_key, media_path, script_style):
     """
 
     response = None
-last_err = None
-for m_name in ["gemini-2.5-flash", "gemini-3.8-flash", "gemini-2.0-flash"]:
-    for attempt in range(2):
-        try:
-            response = client.models.generate_content(
-                model=m_name,
-                contents=[uploaded_file, prompt]
-            )
+    last_err = None
+    for m_name in ["gemini-2.5-flash", "gemini-3.8-flash", "gemini-2.0-flash"]:
+        for attempt in range(2):
+            try:
+                response = client.models.generate_content(
+                    model=m_name,
+                    contents=[uploaded_file, prompt]
+                )
+                break
+            except Exception as e:
+                last_err = e
+                time.sleep(3)
+        if response is not None:
             break
-        except Exception as e:
-            last_err = e
-            time.sleep(3)
-    if response is not None:
-        break
-if response is None:
-    raise last_err
+    if response is None:
+        raise last_err
 
     try:
         client.files.delete(name=uploaded_file.name)
@@ -178,7 +178,7 @@ def generate_narrator_audio(text, character_choice):
 
 # ==================== STREAMLIT UI ====================
 
-st.title("🎙️ AI Transcript & Myanmar Narrator Studio")
+st.title("🎙️ A to Z Narrator Recap Studio")
 st.caption("Video Link / File Upload ➔ Original Transcript ➔ မြန်မာပြန် Recap Script ➔ Character ၄ မျိုး Narrator အသံဖိုင်")
 
 with st.sidebar:
